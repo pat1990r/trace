@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace — System stats in your menu bar</title>
+<meta name="description" content="Trace puts your Mac's vital signs in the menu bar — CPU, memory, storage, battery and uptime at a glance, with one-click device info for IT support.">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --accent: #0a84ff;
+    --line: rgba(0,0,0,.08);
+    --bar-track: rgba(0,0,0,.12);
+    --bar-fill: #1d1d1f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101013;
+      --card: #1b1b1f;
+      --text: #f5f5f7;
+      --muted: #98989d;
+      --accent: #0a84ff;
+      --line: rgba(255,255,255,.1);
+      --bar-track: rgba(255,255,255,.18);
+      --bar-fill: #f5f5f7;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 40px 0 48px; }
+  .menubar-icon {
+    display: inline-flex; flex-direction: column; gap: 4px;
+    padding: 14px; border-radius: 16px;
+    background: var(--card); border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+  }
+  .menubar-icon span {
+    display: block; width: 56px; height: 6px; border-radius: 3px;
+    background: var(--bar-track); position: relative; overflow: hidden;
+  }
+  .menubar-icon span::after {
+    content: ""; position: absolute; inset: 0; border-radius: 3px;
+    background: var(--bar-fill); transform-origin: left;
+    animation: pulse 3.2s ease-in-out infinite alternate;
+  }
+  .menubar-icon span:nth-child(1)::after { width: 62%; animation-duration: 2.6s; }
+  .menubar-icon span:nth-child(2)::after { width: 44%; animation-duration: 3.4s; }
+  .menubar-icon span:nth-child(3)::after { width: 52%; animation-duration: 2.9s; }
+  .menubar-icon span:nth-child(4)::after { width: 70%; animation-duration: 3.8s; }
+  @keyframes pulse { from { transform: scaleX(.55); } to { transform: scaleX(1); } }
+  @media (prefers-reduced-motion: reduce) { .menubar-icon span::after { animation: none; } }
+
+  h1 { font-size: 44px; letter-spacing: -.02em; line-height: 1.1; }
+  .tagline { font-size: 19px; color: var(--muted); margin-top: 10px; }
+  .platform-note { font-size: 13px; color: var(--muted); margin-top: 18px; }
+
+  /* Replace the line below with Apple's "Download on the Mac App Store"
+     badge + link once the app is live:
+     <a href="https://apps.apple.com/app/idXXXXXXXXX">…badge image…</a> */
+
+  /* Sections */
+  section { margin-top: 56px; }
+  h2 { font-size: 24px; letter-spacing: -.01em; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 18px;
+  }
+  .card h3 { font-size: 15px; margin-bottom: 4px; }
+  .card p { font-size: 14px; color: var(--muted); }
+
+  /* FAQ */
+  details {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 18px; margin-bottom: 10px;
+  }
+  summary { font-weight: 600; font-size: 15px; cursor: pointer; }
+  details p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  kbd {
+    font: 600 12px/1 ui-rounded, -apple-system, sans-serif;
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 5px; padding: 3px 6px;
+  }
+
+  /* Contact */
+  .contact {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 22px; text-align: center;
+  }
+  .contact a.button {
+    display: inline-block; margin-top: 12px; padding: 10px 22px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    border-radius: 999px; font-weight: 600; font-size: 15px;
+  }
+  .contact p { color: var(--muted); font-size: 14px; }
+
+  footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+
+  <div class="hero">
+    <div class="menubar-icon" role="img" aria-label="Trace menu bar icon: four animated activity bars">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <h1>Trace</h1>
+    <p class="tagline">Your Mac's vital signs, always one glance away —<br>and everything IT support needs, one click away.</p>
+    <p class="platform-note">For macOS 26 or later · Free on the Mac App Store</p>
+  </div>
+
+  <section>
+    <h2>What it does</h2>
+    <div class="grid">
+      <div class="card"><h3>Live in the menu bar</h3><p>Stacked bars, equaliser columns, a percentage, a ring, or a scrolling CPU/memory graph — your choice, showing the metrics you pick.</p></div>
+      <div class="card"><h3>One panel, everything</h3><p>CPU, memory, storage, battery with 24-hour chart, network speed and IP, VPN status, and uptime.</p></div>
+      <div class="card"><h3>Every tile is a shortcut</h3><p>Rings open Activity Monitor. Storage, battery and Wi-Fi jump straight to the right System Settings pane.</p></div>
+      <div class="card"><h3>Quiet alerts</h3><p>Optional notifications when storage runs low or a restart is overdue. You set the thresholds.</p></div>
+      <div class="card"><h3>Built for IT support</h3><p>Model, serial, macOS build, IP and more — copied for a ticket in one click. MDM-configurable helpdesk links.</p></div>
+      <div class="card"><h3>Desktop widget</h3><p>Small and medium widgets keep your stats on the desktop. Private by design: Trace collects nothing.</p></div>
+    </div>
+  </section>
+
+  <section id="support">
+    <h2>Support</h2>
+
+    <details>
+      <summary>I launched Trace but no window appeared — where is it?</summary>
+      <p>Trace lives in the menu bar, not the Dock. Look for the small stacked-bars icon near the right side of the menu bar and click it — or press <kbd>⌥</kbd> <kbd>⇧</kbd> <kbd>T</kbd> anywhere — to open the panel.</p>
+    </details>
+
+    <details>
+      <summary>How do I change what the menu bar icon shows?</summary>
+      <p>Open the panel → gear icon → Menu bar icon. Pick Bars, Columns, Percent, Ring or Graph, and tick which metrics the bars/columns styles include.</p>
+    </details>
+
+    <details>
+      <summary>How do I add the desktop widget?</summary>
+      <p>Right-click your desktop → Edit Widgets… → search "Trace" → add the small or medium widget. Run Trace at least once first so the widget has data.</p>
+    </details>
+
+    <details>
+      <summary>Alerts aren't appearing</summary>
+      <p>Check the toggles in Trace's Settings → Alerts, then make sure notifications are allowed in System Settings → Notifications → Trace.</p>
+    </details>
+
+    <details>
+      <summary>Can I hide Apple's battery icon since Trace shows battery?</summary>
+      <p>Yes — System Settings → Control Center → Battery → "Don't Show in Menu Bar".</p>
+    </details>
+
+    <details>
+      <summary>How do I quit or relaunch Trace?</summary>
+      <p>Quit from the power button at the bottom of the panel, or right-click the menu bar icon → Quit. Relaunch from your Applications folder, or enable "Launch at login" in Settings.</p>
+    </details>
+
+    <details>
+      <summary>I'm an IT admin — can I preconfigure Trace for my organization?</summary>
+      <p>Yes. Trace reads managed preferences (e.g. via Jamf's Application &amp; Custom Settings) for helpdesk portal, email, phone, ticket-URL templates with device placeholders, announcement banners and launch-at-login. Contact us for the key reference.</p>
+    </details>
+  </section>
+
+  <section>
+    <div class="contact">
+      <h2>Need more help?</h2>
+      <p>Questions, bug reports and feature ideas are all welcome.</p>
+      <a class="button" href="mailto:pat1990r@gmail.com?subject=Trace%20support">Email support</a>
+      <p style="margin-top:10px">We aim to reply within a couple of working days.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Patrick Ramagge. All rights reserved.</span>
+    <span><a href="privacy.html">Privacy Policy</a></span>
+  </footer>
+
+</main>
+</body>
+</html>
