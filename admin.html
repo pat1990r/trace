@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace for IT Administrators — MDM deployment & management</title>
+<meta name="description" content="Deploy and manage Trace with Jamf, Intune, Kandji or any MDM: full managed-preferences key reference, profiles, schemas and troubleshooting.">
+<style>
+  :root {
+    --bg: #0a0a10; --bg-soft: #101018; --card: rgba(255,255,255,.045); --card-solid: #15151e;
+    --line: rgba(255,255,255,.09); --text: #f5f5f7; --muted: #a3a3ad; --faint: #6e6e78;
+    --grad: linear-gradient(135deg, #6a8bff, #b06aff);
+    --nav-bg: rgba(10,10,16,.72); --code-bg: #0d0d14;
+    --good: #30d158; --warn: #ff9f0a;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f5f8; --bg-soft: #eceef3; --card: #ffffff; --card-solid: #ffffff;
+      --line: rgba(0,0,0,.08); --text: #1d1d1f; --muted: #5d5d66; --faint: #9b9ba3;
+      --nav-bg: rgba(244,245,248,.78); --code-bg: #14141c;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+  }
+  a { color: #6a8bff; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: var(--nav-bg); border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 10px; height: 58px; max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 16px; text-decoration: none; color: var(--text); }
+  .brand-icon { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(180deg,#5c7af2,#3d51dc); display: grid; place-items: center; }
+  .brand-icon .bars { display: flex; flex-direction: column; gap: 2px; }
+  .brand-icon .bars i { display: block; height: 2px; border-radius: 1px; background: #fff; }
+  .brand-icon .bars i:nth-child(1){width:12px} .brand-icon .bars i:nth-child(2){width:8px} .brand-icon .bars i:nth-child(3){width:10px}
+  .back { margin-left: auto; font-size: 13.5px; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--text); }
+
+  header.doc { padding: 56px 0 36px; }
+  .kicker {
+    font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    display: block; margin-bottom: 12px;
+  }
+  h1 { font-size: clamp(30px, 5vw, 42px); letter-spacing: -.02em; line-height: 1.1; margin-bottom: 14px; }
+  .lede { color: var(--muted); font-size: 17px; max-width: 60ch; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; }
+  .toc a {
+    font-size: 12.5px; font-weight: 600; color: var(--muted); text-decoration: none;
+    border: 1px solid var(--line); background: var(--card); padding: 6px 12px; border-radius: 999px;
+  }
+  .toc a:hover { color: var(--text); border-color: rgba(127,140,250,.4); }
+
+  main { padding-bottom: 80px; }
+  section.doc-sec { padding-top: 48px; }
+  h2 { font-size: 25px; letter-spacing: -.015em; margin-bottom: 14px; scroll-margin-top: 80px; }
+  h2 .num { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; margin-right: 6px; }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { color: var(--muted); margin-bottom: 12px; }
+  p strong, li strong { color: var(--text); }
+  ul, ol { color: var(--muted); margin: 0 0 12px 22px; }
+  li { margin-bottom: 6px; }
+
+  code {
+    font: 13px ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--card); border: 1px solid var(--line);
+    padding: 1.5px 6px; border-radius: 6px; color: var(--text);
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+    padding: 16px 18px; overflow-x: auto; margin: 14px 0 18px;
+  }
+  pre code { background: none; border: none; padding: 0; color: #d6d8e8; font-size: 12.5px; line-height: 1.7; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+  td:first-child code { white-space: nowrap; }
+  td { color: var(--muted); }
+  td:first-child { color: var(--text); }
+
+  .callout {
+    border: 1px solid var(--line); border-left: 3px solid #6a8bff; background: var(--card);
+    border-radius: 10px; padding: 13px 16px; margin: 14px 0 18px; font-size: 14.5px; color: var(--muted);
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout b { color: var(--text); }
+
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  @media (max-width: 680px) { .dl-grid { grid-template-columns: 1fr; } }
+  .dl {
+    display: block; text-decoration: none; color: var(--text);
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    transition: transform .15s, border-color .15s;
+  }
+  .dl:hover { transform: translateY(-2px); border-color: rgba(127,140,250,.4); }
+  .dl b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .dl span { font-size: 12.5px; color: var(--muted); }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 40px;
+    display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    font-size: 13px; color: var(--faint);
+  }
+  footer a { color: var(--faint); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-icon"><span class="bars"><i></i><i></i><i></i></span></span>
+      Trace
+    </a>
+    <a class="back" href="index.html">← Back to Trace</a>
+  </div>
+</nav>
+
+<header class="doc">
+  <div class="wrap">
+    <span class="kicker">For IT administrators</span>
+    <h1>Deploying &amp; managing Trace</h1>
+    <p class="lede">Trace is built to be fleet-managed. Every support-facing detail — helpdesk links, ticket templates, announcements, branding — can be pushed and locked with a standard configuration profile from Jamf, Intune, Kandji, Mosyle, or any MDM. This page is the complete reference.</p>
+    <div class="toc">
+      <a href="#how">How it works</a>
+      <a href="#quick">Quick start</a>
+      <a href="#keys">Key reference</a>
+      <a href="#tickets">Ticket templates</a>
+      <a href="#announce">Announcements</a>
+      <a href="#app">Deploying the app</a>
+      <a href="#mdm">Per-MDM steps</a>
+      <a href="#verify">Testing &amp; verification</a>
+      <a href="#trouble">Troubleshooting</a>
+      <a href="#security">Security review notes</a>
+      <a href="#downloads">Downloads</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="doc-sec" id="how">
+    <h2><span class="num">1.</span>How management works</h2>
+    <p>Trace reads macOS <strong>managed preferences</strong> on its preference domain:</p>
+    <pre><code>com.patrickramagge.trace</code></pre>
+    <p>Any MDM that can deliver a custom settings payload on that domain can configure Trace. Three behaviours to know:</p>
+    <ul>
+      <li><strong>Profile-delivered keys are forced.</strong> Values arriving via configuration profile appear in the app and lock: the Settings → Support pane switches to a read-only "managed by your organization" view. Users cannot override them.</li>
+      <li><strong>Changes apply live.</strong> Trace watches for preference changes — pushing an updated profile updates the running app within seconds. No relaunch, no logout.</li>
+      <li><strong>Removal restores user control.</strong> Remove the profile and the fields unlock, reverting to whatever the user had set (usually nothing).</li>
+    </ul>
+    <div class="callout"><b>Set-once vs. forced:</b> values written with <code>defaults write</code> or a script populate the same fields but remain user-editable — useful for suggestions, wrong for enforcement. Only profile-delivered (MCX/forced) preferences lock the UI.</div>
+  </section>
+
+  <section class="doc-sec" id="quick">
+    <h2><span class="num">2.</span>Quick start (10 minutes)</h2>
+    <ol>
+      <li>Download <a href="deployment/Trace-ManagedSettings.mobileconfig" download>Trace-ManagedSettings.mobileconfig</a> below.</li>
+      <li>Open it in a text editor and replace the example values (organization name, portal URL, email, phone, ticket template, announcement).</li>
+      <li>Install it on one Mac by double-clicking → System Settings → General → Device Management → Install, and launch Trace to confirm: the panel shows your announcement banner; the Support window shows your branding; Settings → Support shows everything locked.</li>
+      <li>Upload the same payload to your MDM (per-MDM steps in <a href="#mdm">section 7</a>) and scope it.</li>
+      <li>Deploy the app itself via Apps &amp; Books (<a href="#app">section 6</a>).</li>
+    </ol>
+  </section>
+
+  <section class="doc-sec" id="keys">
+    <h2><span class="num">3.</span>Complete key reference</h2>
+    <p>All keys are optional — anything you don't set simply hides in the app. Strings are shown to users verbatim, so they're localisation-ready from your side.</p>
+    <table>
+      <tr><th>Key</th><th>Type</th><th>What it does</th></tr>
+      <tr><td><code>OrganizationName</code></td><td>string</td><td>Title of the Support window, e.g. <em>King's College London</em>. Signals to users that the app is set up by their IT team.</td></tr>
+      <tr><td><code>SupportPortalURL</code></td><td>string</td><td>Helpdesk website. Shown as a link row in the Support window; opens in the default browser.</td></tr>
+      <tr><td><code>SupportPortalLabel</code></td><td>string</td><td>Label for that link. Defaults to "Support portal" when empty.</td></tr>
+      <tr><td><code>SupportEmail</code></td><td>string</td><td>Shown as a row that opens a pre-addressed email (<code>mailto:</code>).</td></tr>
+      <tr><td><code>SupportPhone</code></td><td>string</td><td>Shown as a row that initiates a call (<code>tel:</code>; spaces stripped automatically).</td></tr>
+      <tr><td><code>TicketURLTemplate</code></td><td>string</td><td>"Create a ticket" link with per-device placeholders substituted at click time — see <a href="#tickets">section 4</a>.</td></tr>
+      <tr><td><code>TicketLabel</code></td><td>string</td><td>Label for the ticket button. Defaults to "Create a ticket".</td></tr>
+      <tr><td><code>SupportLinks</code></td><td>array&nbsp;of&nbsp;dicts</td><td>Extra link rows. Each dict: <code>Label</code> (string), <code>URL</code> (string), optional <code>Symbol</code> (an <a href="https://developer.apple.com/sf-symbols/">SF&nbsp;Symbols</a> name, e.g. <code>book</code>, <code>checkmark.shield</code>; defaults to <code>link</code>).</td></tr>
+      <tr><td><code>AnnouncementMessage</code></td><td>string</td><td>Banner pinned to the top of the stats panel until the user dismisses it — see <a href="#announce">section 5</a>.</td></tr>
+      <tr><td><code>AnnouncementURL</code></td><td>string</td><td>Optional link opened when the banner is clicked (status page, change notice…).</td></tr>
+      <tr><td><code>ForceLaunchAtLogin</code></td><td>boolean</td><td>When true, Trace registers itself as a login item every time it launches. See the caveat in <a href="#app">section 6</a>.</td></tr>
+    </table>
+  </section>
+
+  <section class="doc-sec" id="tickets">
+    <h2><span class="num">4.</span>Ticket URL templates</h2>
+    <p>The ticket link pre-fills your ITSM tool with device facts so users never have to find their serial number. Placeholders are substituted (and percent-encoded) on the device at click time:</p>
+    <table>
+      <tr><th>Placeholder</th><th>Substituted with</th><th>Example</th></tr>
+      <tr><td><code>{serial}</code></td><td>Hardware serial number</td><td>C02XK1ZGJGH5</td></tr>
+      <tr><td><code>{model}</code></td><td>Model identifier</td><td>Mac16,1</td></tr>
+      <tr><td><code>{os}</code></td><td>macOS version</td><td>26.1.2</td></tr>
+      <tr><td><code>{hostname}</code></td><td>Computer name</td><td>PAT-MBP-0231</td></tr>
+      <tr><td><code>{username}</code></td><td>Short login name</td><td>k1506283</td></tr>
+    </table>
+    <p>Worked example for a generic ITSM intake form:</p>
+    <pre><code>https://helpdesk.example.ac.uk/new?category=mac&amp;serial={serial}&amp;os={os}&amp;host={hostname}&amp;user={username}</code></pre>
+    <p>Pair it with the user-side "Copy for ticket" button, which puts a formatted plain-text block (device, session and network details) on the clipboard for pasting into the ticket body.</p>
+  </section>
+
+  <section class="doc-sec" id="announce">
+    <h2><span class="num">5.</span>Announcements</h2>
+    <p>The announcement banner is a lightweight broadcast channel: it appears at the top of every managed Mac's panel the next time the panel opens after the profile lands.</p>
+    <ul>
+      <li><strong>Dismissal is per-message.</strong> Trace remembers the exact text the user dismissed. Pushing a profile with <em>different</em> text shows the new banner; re-pushing identical text stays hidden.</li>
+      <li><strong>To re-show the same notice</strong>, change the text trivially (add a date: "Maintenance Sat 08:00–12:00 (reminder)").</li>
+      <li><strong>To retract a notice</strong>, push the profile with <code>AnnouncementMessage</code> removed or empty.</li>
+      <li>If <code>AnnouncementURL</code> is set, the banner becomes clickable and opens it.</li>
+    </ul>
+    <div class="callout">Keep messages to one or two lines — the banner wraps up to three lines and is meant for "heads-up" notices, not essays.</div>
+  </section>
+
+  <section class="doc-sec" id="app">
+    <h2><span class="num">6.</span>Deploying the app itself</h2>
+    <p>Trace is distributed through the Mac App Store, so the supported fleet path is <strong>Apps &amp; Books (VPP)</strong>:</p>
+    <ol>
+      <li>In Apple Business Manager / Apple School Manager → Apps &amp; Books, search for <em>Trace</em> and acquire licenses (free apps still require licenses).</li>
+      <li>In your MDM, deploy it <strong>device-assigned</strong> — no Apple ID required on the Mac, installs silently.</li>
+      <li>Scope the configuration profile to the same devices so the app is branded from first launch.</li>
+    </ol>
+    <h3>Launch at login</h3>
+    <p><code>ForceLaunchAtLogin</code> registers the login item <em>when the app launches</em> — a freshly installed app that has never run can't register itself. Pair the install with a one-time launch, e.g. a Jamf policy or post-install script running:</p>
+    <pre><code>open -a "Mac Trace"</code></pre>
+    <p>From then on it starts at every login. Users see a standard "Mac Trace added as a login item" notification from macOS — expected behaviour.</p>
+  </section>
+
+  <section class="doc-sec" id="mdm">
+    <h2><span class="num">7.</span>Per-MDM walkthroughs</h2>
+
+    <h3>Jamf Pro — Option A: custom schema (recommended)</h3>
+    <ol>
+      <li>Computers → Configuration Profiles → <strong>New</strong>.</li>
+      <li>Add the <strong>Application &amp; Custom Settings → External Applications</strong> payload → <strong>＋ Add</strong> → Source: <strong>Custom Schema</strong>.</li>
+      <li>Preference Domain: <code>com.patrickramagge.trace</code>.</li>
+      <li>Paste the contents of <a href="deployment/Trace-Jamf-Schema.json" download>Trace-Jamf-Schema.json</a> into the schema box.</li>
+      <li>Jamf renders a friendly form — fill in your values, scope, save. Done.</li>
+    </ol>
+    <h3>Jamf Pro — Option B: plist upload</h3>
+    <p>Same payload → Source: <strong>Upload</strong> → domain <code>com.patrickramagge.trace</code> → upload an edited <a href="deployment/Trace-Settings-Example.plist" download>Trace-Settings-Example.plist</a>.</p>
+
+    <h3>Microsoft Intune</h3>
+    <ol>
+      <li>Devices → macOS → Configuration profiles → <strong>Create profile</strong> → Templates → <strong>Preference file</strong>.</li>
+      <li>Bundle ID: <code>com.patrickramagge.trace</code>.</li>
+      <li>Upload the edited <a href="deployment/Trace-Settings-Example.plist" download>Trace-Settings-Example.plist</a>, assign to your device groups.</li>
+    </ol>
+
+    <h3>Kandji, Mosyle, Addigy, others</h3>
+    <p>Use each product's <em>Custom Profile</em> feature with the edited <a href="deployment/Trace-ManagedSettings.mobileconfig" download>Trace-ManagedSettings.mobileconfig</a> — it's a standard custom-settings payload, nothing exotic. Kandji: Library → Custom Profile. Mosyle: Management → Certificates/Profiles → Custom Profile. Addigy: Policies → Profiles → Custom.</p>
+  </section>
+
+  <section class="doc-sec" id="verify">
+    <h2><span class="num">8.</span>Testing &amp; verification</h2>
+    <h3>On a test Mac, without an MDM</h3>
+    <ol>
+      <li>Edit the example <code>.mobileconfig</code> and double-click it.</li>
+      <li>System Settings → General → Device Management → install it.</li>
+      <li>Launch Trace and confirm: the announcement banner appears in the panel; the Support window is branded; Settings → Support is read-only.</li>
+      <li>Remove the profile and confirm everything unlocks.</li>
+    </ol>
+    <h3>Verifying on a managed device</h3>
+    <pre><code># Is the profile present?
+sudo profiles show | grep -A4 patrickramagge
+
+# What does the app actually see? (forced values appear here)
+defaults read com.patrickramagge.trace OrganizationName</code></pre>
+    <p>In the app, the definitive signal is Settings → Support showing <em>"managed by your organization"</em> — that means the keys arrived as forced preferences, not just written values.</p>
+  </section>
+
+  <section class="doc-sec" id="trouble">
+    <h2><span class="num">9.</span>Troubleshooting</h2>
+    <table>
+      <tr><th>Symptom</th><th>Likely cause &amp; fix</th></tr>
+      <tr><td>Values don't appear at all</td><td>Domain typo (must be exactly <code>com.patrickramagge.trace</code>), or the profile isn't scoped to the device. Check <code>sudo profiles show</code>.</td></tr>
+      <tr><td>Values appear but aren't locked</td><td>They were delivered as "set once" or by script rather than as a forced profile payload. Use the configuration-profile route; <code>defaults write</code> never locks.</td></tr>
+      <tr><td>Announcement doesn't reappear</td><td>The text is identical to one the user already dismissed. Change the wording (even a date suffix) to re-show.</td></tr>
+      <tr><td>Ticket link opens with raw <code>{serial}</code></td><td>Placeholder typo — they're case-sensitive and brace-wrapped: <code>{serial}</code>, <code>{model}</code>, <code>{os}</code>, <code>{hostname}</code>, <code>{username}</code>.</td></tr>
+      <tr><td>App doesn't start at login despite <code>ForceLaunchAtLogin</code></td><td>The app hasn't been launched once since install — registration happens at launch. Add a one-time <code>open -a "Mac Trace"</code> policy.</td></tr>
+      <tr><td>Support section shows old values after a push</td><td>Updates apply within seconds while the app runs; if the Mac was asleep during the push, they land on wake. Worst case, quit and relaunch Trace.</td></tr>
+    </table>
+  </section>
+
+  <section class="doc-sec" id="security">
+    <h2><span class="num">10.</span>Notes for security review</h2>
+    <ul>
+      <li><strong>No telemetry.</strong> Trace collects and transmits nothing. Its only network traffic is an HTTPS GET to the public macOS-release feed <code>sofafeed.macadmins.io</code> (the same source used by Nudge), at most every six hours, carrying no device-identifying data.</li>
+      <li><strong>Sandboxed, hardened runtime, Mac App Store reviewed.</strong> No kernel extensions, no privileged helpers, no background daemons beyond the app itself.</li>
+      <li><strong>Local-only device data.</strong> Serial, IP, username and the rest are read locally and leave the device only via the user's own clipboard ("Copy for ticket") or the ticket URL the user clicks — both user-initiated, both going to <em>your</em> configured endpoints.</li>
+      <li><strong>Management is one-way.</strong> Trace reads managed preferences; it reports nothing back to the MDM or anywhere else.</li>
+      <li>Privacy policy: <a href="privacy.html">traceapp privacy</a>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-sec" id="downloads">
+    <h2><span class="num">11.</span>Downloads</h2>
+    <div class="dl-grid">
+      <a class="dl" href="deployment/Trace-ManagedSettings.mobileconfig" download>
+        <b>Trace-ManagedSettings.mobileconfig</b>
+        <span>Complete example profile — edit and deploy with any MDM, or install manually for testing.</span>
+      </a>
+      <a class="dl" href="deployment/Trace-Settings-Example.plist" download>
+        <b>Trace-Settings-Example.plist</b>
+        <span>Bare property list for Jamf "Upload" and Intune "Preference file".</span>
+      </a>
+      <a class="dl" href="deployment/Trace-Jamf-Schema.json" download>
+        <b>Trace-Jamf-Schema.json</b>
+        <span>Jamf custom schema — admins get a form instead of raw XML.</span>
+      </a>
+    </div>
+    <p style="margin-top:18px">Questions, requests for additional managed keys, or pilot feedback: <a href="mailto:pat1990r@gmail.com?subject=Trace%20MDM">pat1990r@gmail.com</a>.</p>
+  </section>
+
+</main>
+
+<div class="wrap">
+  <footer>
+    <span>© 2026 Patrick Ramagge. All rights reserved.</span>
+    <span><a href="index.html">traceapp</a> · <a href="privacy.html">Privacy Policy</a></span>
+  </footer>
+</div>
+
+</body>
+</html>
