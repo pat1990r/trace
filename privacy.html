@@ -6,32 +6,84 @@
 <title>Privacy Policy — Trace</title>
 <meta name="description" content="Trace privacy policy: the app collects no data.">
 <style>
-  :root { --bg:#f5f6f8; --card:#fff; --text:#1d1d1f; --muted:#6e6e73; --accent:#0a84ff; --line:rgba(0,0,0,.08); }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#101013; --card:#1b1b1f; --text:#f5f5f7; --muted:#98989d; --line:rgba(255,255,255,.1); }
+  :root {
+    --bg: #0a0a10; --card: rgba(255,255,255,.045); --line: rgba(255,255,255,.09);
+    --text: #f5f5f7; --muted: #a3a3ad; --faint: #6e6e78;
+    --grad: linear-gradient(135deg, #6a8bff, #b06aff);
+    --nav-bg: rgba(10,10,16,.72);
   }
-  * { box-sizing:border-box; margin:0; }
-  body { font:16px/1.65 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
-  main { max-width:680px; margin:0 auto; padding:48px 24px 64px; }
-  h1 { font-size:32px; letter-spacing:-.02em; margin-bottom:6px; }
-  .date { color:var(--muted); font-size:14px; margin-bottom:28px; }
-  h2 { font-size:19px; margin:28px 0 8px; }
-  p { color:var(--text); margin-bottom:12px; }
-  .lead { font-size:18px; }
-  a { color:var(--accent); }
-  footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-  footer a { color:var(--muted); }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f5f8; --card: #ffffff; --line: rgba(0,0,0,.08);
+      --text: #1d1d1f; --muted: #5d5d66; --faint: #9b9ba3;
+      --nav-bg: rgba(244,245,248,.78);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+  }
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: var(--nav-bg); border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; height: 58px; max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 16px; text-decoration: none; color: var(--text); }
+  .brand-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(180deg, #5c7af2, #3d51dc);
+    display: grid; place-items: center;
+  }
+  .brand-icon .bars { display: flex; flex-direction: column; gap: 2px; }
+  .brand-icon .bars i { display: block; height: 2px; border-radius: 1px; background: #fff; }
+  .brand-icon .bars i:nth-child(1) { width: 12px; }
+  .brand-icon .bars i:nth-child(2) { width: 8px; }
+  .brand-icon .bars i:nth-child(3) { width: 10px; }
+  .back { margin-left: auto; font-size: 13.5px; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--text); }
+
+  main { max-width: 760px; margin: 0 auto; padding: 56px 24px 72px; }
+  h1 { font-size: clamp(30px, 5vw, 40px); letter-spacing: -.02em; margin-bottom: 8px; }
+  .date { color: var(--faint); font-size: 14px; margin-bottom: 36px; }
+  .lead {
+    font-size: 18px; padding: 22px 24px; border-radius: 16px;
+    background: var(--card); border: 1px solid var(--line); margin-bottom: 36px;
+  }
+  .lead b { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h2 { font-size: 19px; letter-spacing: -.01em; margin: 32px 0 10px; }
+  p { color: var(--muted); margin-bottom: 14px; }
+  p em { color: var(--text); font-style: normal; font-weight: 600; }
+  a { color: #6a8bff; }
+  footer {
+    border-top: 1px solid var(--line); margin-top: 56px; padding-top: 24px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    font-size: 13px; color: var(--faint);
+  }
+  footer a { color: var(--faint); }
 </style>
 </head>
 <body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-icon"><span class="bars"><i></i><i></i><i></i></span></span>
+      Trace
+    </a>
+    <a class="back" href="index.html">← Back to Trace</a>
+  </div>
+</nav>
+
 <main>
-  <h1>Trace — Privacy Policy</h1>
+  <h1>Privacy Policy</h1>
   <p class="date">Effective 11 June 2026</p>
 
-  <p class="lead"><strong>Trace does not collect, store, or transmit any personal data.</strong></p>
+  <div class="lead"><b>Trace does not collect, store, or transmit any personal data.</b></div>
 
   <h2>What the app reads</h2>
-  <p>All system statistics shown by Trace — CPU, memory, storage, battery, network throughput, IP address and uptime — are read locally from macOS and never leave your Mac. The app contains no analytics, no advertising, and no tracking of any kind.</p>
+  <p>All system statistics shown by Trace — CPU, memory, storage, battery, network throughput, IP address and uptime — are read locally from macOS and never leave your Mac. The app contains <em>no analytics, no advertising, and no tracking</em> of any kind.</p>
 
   <h2>Network access</h2>
   <p>Trace's only network request is to the public macOS release feed at <em>sofafeed.macadmins.io</em>, used to tell you when a newer macOS version is available. This request sends no personal or device-identifying information.</p>
@@ -50,7 +102,7 @@
 
   <footer>
     <span>© 2026 Patrick Ramagge. All rights reserved.</span>
-    <span><a href="index.html">← Back to Trace</a></span>
+    <span><a href="index.html">traceapp</a></span>
   </footer>
 </main>
 </body>
