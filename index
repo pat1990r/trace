@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace — Your Mac's vital signs, one glance away</title>
+<meta name="description" content="Trace puts CPU, memory, storage, battery and uptime in your menu bar — with one-click device info for IT support. Free on the Mac App Store.">
+<meta property="og:title" content="Trace — System stats in your menu bar">
+<meta property="og:description" content="Your Mac's vital signs, always one glance away. Free on the Mac App Store.">
+<style>
+  /* ───────────────────────── Design tokens ───────────────────────── */
+  :root {
+    --bg: #0a0a10;
+    --bg-soft: #101018;
+    --card: rgba(255,255,255,.045);
+    --card-solid: #15151e;
+    --line: rgba(255,255,255,.09);
+    --text: #f5f5f7;
+    --muted: #a3a3ad;
+    --faint: #6e6e78;
+    --blue: #5b7bfa;
+    --purple: #a45bfa;
+    --orange: #ff9f0a;
+    --green: #30d158;
+    --teal: #40c8e0;
+    --grad: linear-gradient(135deg, #6a8bff, #b06aff);
+    --glow-a: rgba(91,123,250,.28);
+    --glow-b: rgba(164,91,250,.22);
+    --nav-bg: rgba(10,10,16,.72);
+    --shadow: 0 24px 80px rgba(0,0,0,.55);
+    --radius: 18px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f5f8;
+      --bg-soft: #eceef3;
+      --card: #ffffff;
+      --card-solid: #ffffff;
+      --line: rgba(0,0,0,.08);
+      --text: #1d1d1f;
+      --muted: #5d5d66;
+      --faint: #9b9ba3;
+      --glow-a: rgba(91,123,250,.18);
+      --glow-b: rgba(164,91,250,.14);
+      --nav-bg: rgba(244,245,248,.78);
+      --shadow: 0 24px 70px rgba(40,50,120,.16);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: rgba(106,139,255,.35); }
+  a { color: inherit; }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  /* ───────────────────────── Nav ───────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex; align-items: center; gap: 28px;
+    height: 58px; max-width: 1060px; margin: 0 auto; padding: 0 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 16px; text-decoration: none; }
+  .brand-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(180deg, #5c7af2, #3d51dc);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .brand-icon .bars { display: flex; flex-direction: column; gap: 2px; }
+  .brand-icon .bars i { display: block; height: 2px; border-radius: 1px; background: #fff; }
+  .brand-icon .bars i:nth-child(1) { width: 12px; }
+  .brand-icon .bars i:nth-child(2) { width: 8px; }
+  .brand-icon .bars i:nth-child(3) { width: 10px; }
+  .nav-links { display: flex; gap: 22px; margin-left: auto; align-items: center; }
+  .nav-links a { font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color .15s; }
+  .nav-links a:hover { color: var(--text); }
+  .btn-small {
+    font-size: 13px; font-weight: 600; color: #fff !important;
+    background: var(--grad); padding: 7px 16px; border-radius: 999px;
+    text-decoration: none; box-shadow: 0 4px 16px rgba(106,139,255,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-small:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(106,139,255,.45); }
+  @media (max-width: 640px) { .nav-links a:not(.btn-small) { display: none; } }
+
+  /* ───────────────────────── Hero ───────────────────────── */
+  .hero { position: relative; padding: 88px 0 96px; }
+  .glow {
+    position: absolute; pointer-events: none; filter: blur(90px); z-index: 0;
+  }
+  .glow.a { width: 560px; height: 560px; left: -160px; top: -120px; background: radial-gradient(circle, var(--glow-a), transparent 65%); }
+  .glow.b { width: 520px; height: 520px; right: -140px; top: 140px; background: radial-gradient(circle, var(--glow-b), transparent 65%); }
+
+  .hero-grid {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1.08fr .92fr; gap: 56px; align-items: center;
+  }
+  @media (max-width: 880px) { .hero-grid { grid-template-columns: 1fr; gap: 64px; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    color: var(--muted); border: 1px solid var(--line);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+    background: var(--card);
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+  h1 {
+    font-size: clamp(38px, 6vw, 58px); line-height: 1.05;
+    letter-spacing: -.025em; font-weight: 800; margin-bottom: 20px;
+  }
+  h1 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 46ch; margin-bottom: 30px; }
+
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 15px; font-weight: 600; color: #fff; text-decoration: none;
+    background: var(--grad); padding: 13px 26px; border-radius: 13px;
+    box-shadow: 0 8px 28px rgba(106,139,255,.4);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(106,139,255,.5); }
+  .btn-ghost {
+    font-size: 15px; font-weight: 600; color: var(--text); text-decoration: none;
+    padding: 13px 22px; border-radius: 13px; border: 1px solid var(--line);
+    background: var(--card); transition: background .15s, transform .15s;
+  }
+  .btn-ghost:hover { transform: translateY(-2px); background: var(--bg-soft); }
+  .hero-meta { margin-top: 18px; font-size: 12.5px; color: var(--faint); }
+
+  /* ───────────────────────── Panel mockup ───────────────────────── */
+  @property --p { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+  .mock-wrap { display: flex; justify-content: center; perspective: 1200px; }
+  .panel {
+    width: 304px; border-radius: 26px;
+    background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.045));
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: var(--shadow);
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    animation: float 7s ease-in-out infinite;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  @media (prefers-color-scheme: light) {
+    .panel { background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78)); border-color: rgba(0,0,0,.07); }
+  }
+  @keyframes float { 0%,100% { transform: rotateY(-4deg) translateY(0); } 50% { transform: rotateY(-4deg) translateY(-10px); } }
+
+  .tile {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 12px 14px;
+  }
+  .tile-row { display: flex; gap: 10px; }
+  .tile-row .tile { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px 10px; }
+
+  .ring { --ring: var(--blue); width: 66px; height: 66px; border-radius: 50%; position: relative; display: grid; place-items: center;
+    background: conic-gradient(var(--ring) calc(var(--p) * 1%), rgba(127,127,140,.22) 0);
+    transition: --p 1.4s ease; }
+  .ring::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--card-solid); }
+  @media (prefers-color-scheme: light) { .ring::before { background: #fff; } }
+  .ring span { position: relative; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ring.cpu { animation: sweep23 1.4s ease-out forwards; }
+  .ring.mem { --ring: var(--purple); animation: sweep67 1.6s ease-out forwards; }
+  @keyframes sweep23 { from { --p: 0; } to { --p: 23; } }
+  @keyframes sweep67 { from { --p: 0; } to { --p: 67; } }
+
+  .tile h4 { font-size: 12px; font-weight: 650; }
+  .tile .cap { font-size: 9.5px; color: var(--muted); }
+  .tile-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .tile-head h4 { font-size: 12.5px; }
+  .tile-head .cap { font-size: 10.5px; font-variant-numeric: tabular-nums; }
+
+  .bar { height: 14px; border-radius: 999px; background: rgba(127,127,140,.22); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; width: 0; }
+  .bar.storage i { background: var(--orange); animation: grow18 1.4s .25s ease-out forwards; }
+  .bar.battery i { background: var(--green); animation: grow82 1.6s .35s ease-out forwards; }
+  @keyframes grow18 { to { width: 18%; } }
+  @keyframes grow82 { to { width: 82%; } }
+  .spark { margin-top: 8px; display: block; width: 100%; height: 26px; }
+
+  .nrow { display: flex; align-items: center; gap: 9px; padding: 10px 14px; }
+  .nrow .globe { width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid var(--teal); position: relative; flex-shrink: 0; }
+  .nrow .globe::before { content: ""; position: absolute; inset: -1px 5px; border: 1.3px solid var(--teal); border-radius: 50%; }
+  .nrow .nmeta { line-height: 1.25; }
+  .nrow .nmeta b { font-size: 11.5px; display: block; }
+  .nrow .nmeta span { font-size: 9.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .nrow .speeds { margin-left: auto; text-align: right; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.4; }
+  .nrow .speeds .dn::before { content: "↓ "; color: var(--muted); font-weight: 500; }
+  .nrow .speeds .up::before { content: "↑ "; color: var(--muted); font-weight: 500; }
+
+  .urow { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+  .uring { --ring: var(--teal); width: 34px; height: 34px; border-radius: 50%; position: relative; flex-shrink: 0;
+    background: conic-gradient(var(--ring) calc(var(--p) * 1%), rgba(127,127,140,.22) 0); animation: sweep38 1.5s .3s ease-out forwards; }
+  @keyframes sweep38 { from { --p: 0; } to { --p: 38; } }
+  .uring::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--card-solid); }
+  @media (prefers-color-scheme: light) { .uring::before { background: #fff; } }
+  .urow .umeta b { font-size: 12px; display: block; }
+  .urow .umeta span { font-size: 9.5px; color: var(--muted); }
+  .urow .uval { margin-left: auto; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .btnrow { display: flex; justify-content: center; gap: 10px; padding-top: 2px; }
+  .btnrow i {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--card); border: 1px solid var(--line);
+    display: grid; place-items: center; font-style: normal; font-size: 13px; color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel { animation: none; }
+    .ring.cpu, .ring.mem, .uring { animation: none; --p: 50; }
+    .ring.cpu { --p: 23; } .ring.mem { --p: 67; } .uring { --p: 38; }
+    .bar.storage i { animation: none; width: 18%; }
+    .bar.battery i { animation: none; width: 82%; }
+  }
+
+  /* ───────────────────────── Sections ───────────────────────── */
+  section { padding: 84px 0; position: relative; }
+  .sec-head { text-align: center; max-width: 620px; margin: 0 auto 52px; }
+  .sec-head .kicker {
+    font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 12px; display: block;
+  }
+  .sec-head h2 { font-size: clamp(28px, 4.4vw, 40px); letter-spacing: -.02em; line-height: 1.12; margin-bottom: 14px; }
+  .sec-head p { color: var(--muted); font-size: 16.5px; }
+
+  /* Menu bar strip */
+  .menubar-demo {
+    display: flex; align-items: center; justify-content: center; gap: 26px;
+    background: var(--card-solid); border: 1px solid var(--line);
+    border-radius: 14px; padding: 13px 26px; max-width: 660px; margin: 0 auto;
+    box-shadow: var(--shadow); flex-wrap: wrap;
+  }
+  .mb-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .mb-item .label { font-size: 10.5px; color: var(--faint); font-weight: 600; letter-spacing: .03em; }
+  .mb-glyph { height: 22px; display: flex; align-items: center; }
+  .mb-bars { display: flex; flex-direction: column; gap: 2.4px; }
+  .mb-bars i { display: block; height: 3px; border-radius: 2px; background: var(--text); }
+  .mb-bars i:nth-child(1) { width: 19px; } .mb-bars i:nth-child(2) { width: 12px; }
+  .mb-bars i:nth-child(3) { width: 16px; } .mb-bars i:nth-child(4) { width: 9px; }
+  .mb-cols { display: flex; align-items: flex-end; gap: 2.6px; height: 18px; }
+  .mb-cols i { display: block; width: 3.6px; border-radius: 2px; background: var(--text); }
+  .mb-cols i:nth-child(1) { height: 9px; } .mb-cols i:nth-child(2) { height: 16px; }
+  .mb-cols i:nth-child(3) { height: 6px; } .mb-cols i:nth-child(4) { height: 12px; }
+  .mb-pct { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mb-ring { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(var(--text) 47%, rgba(127,127,140,.25) 0); position: relative; }
+  .mb-ring::before { content: ""; position: absolute; inset: 3.4px; border-radius: 50%; background: var(--card-solid); }
+  .mb-graph { width: 30px; height: 16px; }
+
+  /* Feature grid */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 880px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 580px) { .grid { grid-template-columns: 1fr; } }
+  .feature {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 26px 24px; transition: transform .2s, border-color .2s, background .2s;
+  }
+  .feature:hover { transform: translateY(-4px); border-color: rgba(127,140,250,.35); }
+  .chip {
+    width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+    margin-bottom: 16px; font-size: 17px;
+    background: linear-gradient(135deg, var(--c1, #6a8bff), var(--c2, #4a5fd0));
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+  .feature h3 { font-size: 16.5px; margin-bottom: 8px; letter-spacing: -.01em; }
+  .feature p { font-size: 14px; color: var(--muted); }
+
+  /* IT section */
+  .it-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 820px) { .it-grid { grid-template-columns: 1fr; } }
+  .it-copy h2 { font-size: clamp(26px, 3.8vw, 36px); letter-spacing: -.02em; line-height: 1.15; margin-bottom: 16px; }
+  .it-copy p { color: var(--muted); margin-bottom: 14px; font-size: 15.5px; }
+  .it-list { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .it-list li { display: flex; gap: 11px; font-size: 14.5px; align-items: flex-start; }
+  .it-list .tick {
+    width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+    background: var(--grad); display: grid; place-items: center;
+    font-size: 11px; color: #fff; font-weight: 800;
+  }
+  .code-card {
+    background: #0d0d14; border: 1px solid rgba(255,255,255,.1); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden; font-size: 12.5px;
+  }
+  .code-card .bar-top { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .code-card .bar-top i { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.14); }
+  .code-card .bar-top i:nth-child(1) { background: #ff5f57; } .code-card .bar-top i:nth-child(2) { background: #febc2e; } .code-card .bar-top i:nth-child(3) { background: #28c840; }
+  .code-card pre {
+    padding: 18px 20px; overflow-x: auto; color: #d6d8e8;
+    font: 12px/1.75 ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  }
+  .code-card .k { color: #8ab4ff; } .code-card .s { color: #9fe6a0; } .code-card .c { color: #5c5e72; }
+
+  /* Privacy band */
+  .privacy-band {
+    text-align: center; border: 1px solid var(--line); border-radius: 24px;
+    padding: 56px 32px; background:
+      radial-gradient(600px 200px at 50% 0%, rgba(91,123,250,.12), transparent),
+      var(--card);
+  }
+  .privacy-band .lock { font-size: 30px; margin-bottom: 14px; }
+  .privacy-band h2 { font-size: clamp(24px, 3.6vw, 34px); letter-spacing: -.02em; margin-bottom: 12px; }
+  .privacy-band p { color: var(--muted); max-width: 56ch; margin: 0 auto; font-size: 15.5px; }
+
+  /* FAQ */
+  .faq { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  details {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 0; overflow: hidden; transition: border-color .2s;
+  }
+  details:hover { border-color: rgba(127,140,250,.3); }
+  summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between;
+    font-weight: 600; font-size: 15px; padding: 17px 20px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-size: 19px; font-weight: 400; color: var(--faint); transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details .a { padding: 0 20px 18px; font-size: 14px; color: var(--muted); }
+  details .a kbd {
+    font: 600 11.5px ui-rounded, -apple-system, sans-serif;
+    background: var(--bg-soft); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px;
+  }
+
+  /* Contact */
+  .contact-card {
+    text-align: center; border-radius: 24px; padding: 60px 32px;
+    background: var(--grad); color: #fff; position: relative; overflow: hidden;
+  }
+  .contact-card::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(420px 200px at 80% -20%, rgba(255,255,255,.25), transparent);
+  }
+  .contact-card h2 { font-size: clamp(24px, 3.6vw, 34px); letter-spacing: -.02em; margin-bottom: 10px; position: relative; }
+  .contact-card p { opacity: .85; margin-bottom: 26px; position: relative; font-size: 15.5px; }
+  .btn-invert {
+    position: relative; display: inline-block; background: #fff; color: #3d51dc; font-weight: 700;
+    text-decoration: none; font-size: 15px; padding: 13px 28px; border-radius: 13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25); transition: transform .15s;
+  }
+  .btn-invert:hover { transform: translateY(-2px); }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 30px 0 44px;
+    display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    font-size: 13px; color: var(--faint);
+  }
+  footer a { color: var(--faint); }
+  footer a:hover { color: var(--text); }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="#">
+      <span class="brand-icon"><span class="bars"><i></i><i></i><i></i></span></span>
+      Trace
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#it">For IT</a>
+      <a href="#faq">Support</a>
+      <a class="btn-small" href="#get">Get Trace</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> FREE · MAC APP STORE</span>
+      <h1>Your Mac's vital signs,<br><span class="grad">one glance away.</span></h1>
+      <p class="lede">CPU, memory, storage, battery and uptime — live in your menu bar. And everything IT support asks for, copied for a ticket in one click.</p>
+      <div class="cta-row">
+        <!-- Once live, point this at https://apps.apple.com/app/idXXXXXXXXXX -->
+        <a class="btn-primary" href="#get">↓&nbsp; Download for Mac</a>
+        <a class="btn-ghost" href="#features">See what it does</a>
+      </div>
+      <p class="hero-meta">macOS 26 or later · No account · Collects nothing</p>
+    </div>
+
+    <div class="mock-wrap">
+      <div class="panel" role="img" aria-label="The Trace panel showing CPU, memory, storage, battery, network and uptime">
+        <div class="tile-row">
+          <div class="tile">
+            <div class="ring cpu"><span id="cpuNum">23%</span></div>
+            <h4>CPU</h4><span class="cap">Nominal · 77% idle</span>
+          </div>
+          <div class="tile">
+            <div class="ring mem"><span id="memNum">67%</span></div>
+            <h4>Memory</h4><span class="cap">10.8 of 16 GB</span>
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="tile-head"><h4>Storage</h4><span class="cap">811 GB free of 995 GB</span></div>
+          <div class="bar storage"><i></i></div>
+        </div>
+
+        <div class="tile">
+          <div class="tile-head"><h4>Battery</h4><span class="cap">82% · 5h 12m remaining</span></div>
+          <div class="bar battery"><i></i></div>
+          <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,16 L10,14 L18,15 L26,8 L36,9 L48,7 L60,8 L72,6 L84,7 L100,5 L100,24 L0,24 Z" fill="rgba(48,209,88,.22)"/>
+            <path d="M0,16 L10,14 L18,15 L26,8 L36,9 L48,7 L60,8 L72,6 L84,7 L100,5" fill="none" stroke="#30d158" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="tile nrow">
+          <span class="globe" aria-hidden="true"></span>
+          <span class="nmeta"><b>Wi-Fi</b><span>192.168.1.24</span></span>
+          <span class="speeds"><span class="dn" id="dn">6.4 MB/s</span><br><span class="up" id="up">88 KB/s</span></span>
+        </div>
+
+        <div class="tile urow">
+          <span class="uring" aria-hidden="true"></span>
+          <span class="umeta"><b>Uptime</b><span>Restart in 5 days</span></span>
+          <span class="uval">2d 14h</span>
+        </div>
+
+        <div class="btnrow" aria-hidden="true"><i>⌄</i><i>⊕</i><i>⚙</i><i>⏻</i></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="styles" style="padding-top: 10px;">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Make it yours</span>
+      <h2>Five menu bar styles. Your metrics, your colours.</h2>
+      <p>Stacked bars, equaliser columns, a percentage, a ring, or a live two-minute graph — showing exactly the metrics you choose.</p>
+    </div>
+    <div class="menubar-demo reveal">
+      <div class="mb-item"><span class="mb-glyph"><span class="mb-bars"><i></i><i></i><i></i><i></i></span></span><span class="label">BARS</span></div>
+      <div class="mb-item"><span class="mb-glyph"><span class="mb-cols"><i></i><i></i><i></i><i></i></span></span><span class="label">COLUMNS</span></div>
+      <div class="mb-item"><span class="mb-glyph"><span class="mb-pct">47%</span></span><span class="label">PERCENT</span></div>
+      <div class="mb-item"><span class="mb-glyph"><span class="mb-ring"></span></span><span class="label">RING</span></div>
+      <div class="mb-item"><span class="mb-glyph"><svg class="mb-graph" viewBox="0 0 30 16" aria-hidden="true"><path d="M0,11 L4,7 L8,12 L12,5 L16,9 L20,4 L24,10 L30,7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="label">GRAPH</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Features</span>
+      <h2>Everything that matters.<br>Nothing that doesn't.</h2>
+    </div>
+    <div class="grid">
+      <div class="feature reveal" style="--c1:#6a8bff; --c2:#4a5fd0;">
+        <div class="chip">▦</div>
+        <h3>One panel, everything</h3>
+        <p>CPU and memory gauges — rings, pies or bars — plus storage, battery with a 24-hour chart, network speed, IP, VPN status and uptime. Reorder or hide any section.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#b06aff; --c2:#7a3fd6;">
+        <div class="chip">↗</div>
+        <h3>Every tile is a shortcut</h3>
+        <p>Gauges open Activity Monitor. Storage, battery and Wi-Fi jump straight to the right System Settings pane. One click, no hunting.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#ff9f4a; --c2:#e0742a;">
+        <div class="chip">⚠</div>
+        <h3>Warnings you can see</h3>
+        <p>Gauges turn orange under thermal throttling or memory pressure, and when storage passes your threshold. Optional quiet notifications, never nagging by default.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#30d158; --c2:#1fa040;">
+        <div class="chip">⌘</div>
+        <h3>Always within reach</h3>
+        <p>Open the panel from anywhere with a global shortcut you choose — ⌥⇧T out of the box. A compact mode shrinks everything to four slim bars.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#40c8e0; --c2:#1f96b0;">
+        <div class="chip">▤</div>
+        <h3>Desktop widget</h3>
+        <p>Small and medium widgets keep CPU, memory, disk and battery on your desktop, refreshed automatically through the day.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#ff6a8b; --c2:#d63a60;">
+        <div class="chip">♥</div>
+        <h3>A good citizen</h3>
+        <p>Near-zero CPU when idle, no kernel extensions, no background daemons, fully sandboxed. A monitor should never be the thing you need to monitor.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="it" style="background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+  <div class="wrap it-grid">
+    <div class="it-copy reveal">
+      <span class="kicker" style="display:block; font-size:12.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:12px;">Built for IT</span>
+      <h2>Deploy it. Brand it. Let tickets write themselves.</h2>
+      <p>The Support window gathers what your service desk asks for — model, serial, macOS build, memory, storage, IP, uptime — and copies it for a ticket in one click.</p>
+      <p>Push your helpdesk details with any MDM. Profile-managed values lock in the app automatically.</p>
+      <ul class="it-list">
+        <li><span class="tick">✓</span> Jamf, Intune, Kandji, Mosyle — any MDM with custom profiles</li>
+        <li><span class="tick">✓</span> Ticket links with per-device placeholders: serial, model, OS, hostname</li>
+        <li><span class="tick">✓</span> Announcement banners pushed to every panel</li>
+        <li><span class="tick">✓</span> Deploy silently via Apps &amp; Books (VPP)</li>
+      </ul>
+    </div>
+    <div class="code-card reveal" aria-label="Example managed configuration">
+      <div class="bar-top"><i></i><i></i><i></i></div>
+      <pre><span class="c">&lt;!-- com.patrickramagge.trace --&gt;</span>
+<span class="k">&lt;key&gt;</span>OrganizationName<span class="k">&lt;/key&gt;</span>
+<span class="s">&lt;string&gt;King's College London&lt;/string&gt;</span>
+<span class="k">&lt;key&gt;</span>SupportPortalURL<span class="k">&lt;/key&gt;</span>
+<span class="s">&lt;string&gt;https://helpdesk.kcl.ac.uk&lt;/string&gt;</span>
+<span class="k">&lt;key&gt;</span>TicketURLTemplate<span class="k">&lt;/key&gt;</span>
+<span class="s">&lt;string&gt;…/new?serial={serial}&amp;os={os}&lt;/string&gt;</span>
+<span class="k">&lt;key&gt;</span>AnnouncementMessage<span class="k">&lt;/key&gt;</span>
+<span class="s">&lt;string&gt;Maintenance Sat 08:00–12:00&lt;/string&gt;</span></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="privacy-band reveal">
+      <div class="lock">🔒</div>
+      <h2>Collects nothing. Sends nothing.</h2>
+      <p>Every statistic is read locally and never leaves your Mac. No accounts, no analytics, no ads. The only network request checks a public feed for new macOS versions.</p>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">Support</span>
+      <h2>Questions, answered.</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>I launched Trace but no window appeared — where is it?</summary>
+        <div class="a">Trace lives in the menu bar, not the Dock. Look for the small stacked-bars icon near the right side of your menu bar and click it — or press <kbd>⌥</kbd> <kbd>⇧</kbd> <kbd>T</kbd> anywhere — to open the panel.</div>
+      </details>
+      <details>
+        <summary>How do I change what the menu bar icon shows?</summary>
+        <div class="a">Open the panel → gear icon → Menu Bar. Pick Bars, Columns, Percent, Ring or Graph, and tick which metrics the bars and columns include.</div>
+      </details>
+      <details>
+        <summary>How do I change the layout or colours of the panel?</summary>
+        <div class="a">Settings → Panel lets you switch the CPU &amp; Memory gauges between rings, pies and bars, and show, hide or reorder every section. Settings → Appearance has eight themes plus fully custom per-metric colours.</div>
+      </details>
+      <details>
+        <summary>How do I add the desktop widget?</summary>
+        <div class="a">Right-click your desktop → Edit Widgets… → search "Trace" → add the small or medium widget. Run Trace at least once first so the widget has data.</div>
+      </details>
+      <details>
+        <summary>Alerts aren't appearing</summary>
+        <div class="a">Check the toggles in Trace's Settings → Alerts, then make sure notifications are allowed in System Settings → Notifications → Trace.</div>
+      </details>
+      <details>
+        <summary>Can I hide Apple's battery icon since Trace shows battery?</summary>
+        <div class="a">Yes — System Settings → Control Center → Battery → "Don't Show in Menu Bar".</div>
+      </details>
+      <details>
+        <summary>How do I quit or relaunch Trace?</summary>
+        <div class="a">Quit from the power button at the bottom of the panel, or right-click the menu bar icon → Quit. Relaunch from your Applications folder, or enable "Launch at login" in Settings.</div>
+      </details>
+      <details>
+        <summary>I'm an IT admin — can I preconfigure Trace for my organization?</summary>
+        <div class="a">Yes. Trace reads managed preferences (e.g. via Jamf's Application &amp; Custom Settings) for helpdesk portal, email, phone, ticket-URL templates with device placeholders, announcement banners and launch-at-login. Email us for the full key reference and a ready-made Jamf schema.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="get" style="padding-top: 20px;">
+  <div class="wrap">
+    <div class="contact-card reveal">
+      <h2>Get Trace</h2>
+      <p>Free on the Mac App Store for macOS 26 or later.<br>Questions, bug reports and feature ideas are all welcome.</p>
+      <!-- Once live, swap this for the App Store badge + link -->
+      <a class="btn-invert" href="mailto:pat1990r@gmail.com?subject=Trace">Email support</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>© 2026 Patrick Ramagge. All rights reserved.</span>
+    <span><a href="privacy.html">Privacy Policy</a></span>
+  </footer>
+</div>
+
+<script>
+  // Scroll reveals
+  const observer = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); observer.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+  // Gentle live numbers in the hero mockup
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const cpuEl = document.getElementById("cpuNum");
+    const memEl = document.getElementById("memNum");
+    const dnEl = document.getElementById("dn");
+    const upEl = document.getElementById("up");
+    const cpuRing = document.querySelector(".ring.cpu");
+    const memRing = document.querySelector(".ring.mem");
+    let cpu = 23, mem = 67, tookOver = false;
+    const drift = (v, lo, hi, step) => Math.min(hi, Math.max(lo, v + (Math.random() - 0.5) * step));
+    setInterval(() => {
+      if (!tookOver) {
+        // The intro sweep's fill-mode would override inline styles —
+        // detach it once, then drive --p directly (it transitions).
+        cpuRing.style.animation = "none";
+        memRing.style.animation = "none";
+        tookOver = true;
+      }
+      cpu = drift(cpu, 14, 41, 7);
+      mem = drift(mem, 62, 72, 3);
+      cpuEl.textContent = Math.round(cpu) + "%";
+      memEl.textContent = Math.round(mem) + "%";
+      dnEl.textContent = (4 + Math.random() * 5).toFixed(1) + " MB/s";
+      upEl.textContent = Math.round(40 + Math.random() * 90) + " KB/s";
+      cpuRing.style.setProperty("--p", Math.round(cpu));
+      memRing.style.setProperty("--p", Math.round(mem));
+    }, 2400);
+  }
+</script>
+</body>
+</html>
