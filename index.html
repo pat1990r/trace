@@ -396,7 +396,7 @@
         <a class="btn-primary" href="#get">↓&nbsp; Download for Mac</a>
         <a class="btn-ghost" href="#features">See what it does</a>
       </div>
-      <p class="hero-meta">macOS 26 or later · No account · Collects nothing</p>
+      <p class="hero-meta">macOS 14 or later · English, Español, Deutsch, Français, 日本語 · Collects nothing</p>
     </div>
 
     <div class="mock-wrap">
@@ -471,7 +471,7 @@
       <div class="feature reveal" style="--c1:#6a8bff; --c2:#4a5fd0;">
         <div class="chip">▦</div>
         <h3>One panel, everything</h3>
-        <p>CPU and memory gauges — rings, pies or bars — plus storage, battery with a 24-hour chart, network speed, IP, VPN status and uptime. Reorder or hide any section.</p>
+        <p>CPU and memory gauges — rings, pies or bars — plus storage with external drives, battery with a 24-hour chart, network speed, IP, VPN status and uptime. Reorder or hide any section.</p>
       </div>
       <div class="feature reveal" style="--c1:#b06aff; --c2:#7a3fd6;">
         <div class="chip">↗</div>
@@ -480,8 +480,8 @@
       </div>
       <div class="feature reveal" style="--c1:#ff9f4a; --c2:#e0742a;">
         <div class="chip">⚠</div>
-        <h3>Warnings you can see</h3>
-        <p>Gauges turn orange under thermal throttling or memory pressure, and when storage passes your threshold. Optional quiet notifications, never nagging by default.</p>
+        <h3>Alerts you control</h3>
+        <p>Gauges turn orange before there's trouble, and optional notifications cover low storage, low battery, overdue restarts, macOS updates and system health — thresholds and repeat frequency are yours to choose.</p>
       </div>
       <div class="feature reveal" style="--c1:#30d158; --c2:#1fa040;">
         <div class="chip">⌘</div>
@@ -491,7 +491,17 @@
       <div class="feature reveal" style="--c1:#40c8e0; --c2:#1f96b0;">
         <div class="chip">▤</div>
         <h3>Desktop widget</h3>
-        <p>Small and medium widgets keep CPU, memory, disk and battery on your desktop, refreshed automatically through the day.</p>
+        <p>Small, medium and large widgets keep your vitals on the desktop — the large one adds two-minute CPU and memory charts.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#a45bfa; --c2:#6f35c9;">
+        <div class="chip">◫</div>
+        <h3>Seven days of history</h3>
+        <p>Minute-by-minute CPU, memory and disk charts over 24 hours or 7 days — see what happened while you were away, then export it all as CSV.</p>
+      </div>
+      <div class="feature reveal" style="--c1:#5b7bfa; --c2:#3a54c9;">
+        <div class="chip">⚙</div>
+        <h3>Speaks Shortcuts</h3>
+        <p>Six actions — CPU, memory, storage, battery, uptime and the panel itself — ready for your own automations in Apple Shortcuts.</p>
       </div>
       <div class="feature reveal" style="--c1:#ff6a8b; --c2:#d63a60;">
         <div class="chip">♥</div>
@@ -512,6 +522,8 @@
       <ul class="it-list">
         <li><span class="tick">✓</span> Jamf, Intune, Kandji, Mosyle — any MDM with custom profiles</li>
         <li><span class="tick">✓</span> Ticket links with per-device placeholders: serial, model, OS, hostname</li>
+        <li><span class="tick">✓</span> Alert thresholds &amp; cadence by policy — with macOS update deadlines for Cyber&nbsp;Essentials+</li>
+        <li><span class="tick">✓</span> Jamf Extension Attributes for update-pressure dashboards</li>
         <li><span class="tick">✓</span> Announcement banners pushed to every panel</li>
         <li><span class="tick">✓</span> Deploy silently via Apps &amp; Books (VPP)</li>
       </ul>
@@ -526,6 +538,8 @@
 <span class="s">&lt;string&gt;https://helpdesk.kcl.ac.uk&lt;/string&gt;</span>
 <span class="k">&lt;key&gt;</span>TicketURLTemplate<span class="k">&lt;/key&gt;</span>
 <span class="s">&lt;string&gt;…/new?serial={serial}&amp;os={os}&lt;/string&gt;</span>
+<span class="k">&lt;key&gt;</span>UpdateDeadlineDays<span class="k">&lt;/key&gt;</span>
+<span class="s">&lt;integer&gt;14&lt;/integer&gt;</span>
 <span class="k">&lt;key&gt;</span>AnnouncementMessage<span class="k">&lt;/key&gt;</span>
 <span class="s">&lt;string&gt;Maintenance Sat 08:00–12:00&lt;/string&gt;</span></pre>
     </div>
@@ -537,7 +551,7 @@
     <div class="privacy-band reveal">
       <div class="lock">🔒</div>
       <h2>Collects nothing. Sends nothing.</h2>
-      <p>Every statistic is read locally and never leaves your Mac. No accounts, no analytics, no ads. The only network request checks a public feed for new macOS versions.</p>
+      <p>Every statistic is read locally and never leaves your Mac. No accounts, no analytics, no ads. The only network requests check public version feeds — nothing about you or your Mac is ever sent.</p>
     </div>
   </div>
 </section>
@@ -563,11 +577,15 @@
       </details>
       <details>
         <summary>How do I add the desktop widget?</summary>
-        <div class="a">Right-click your desktop → Edit Widgets… → search "Trace" → add the small or medium widget. Run Trace at least once first so the widget has data.</div>
+        <div class="a">Right-click your desktop → Edit Widgets… → search "Trace" → add the small, medium or large widget. Run Trace at least once first so the widget has data.</div>
       </details>
       <details>
         <summary>Alerts aren't appearing</summary>
-        <div class="a">Check the toggles in Trace's Settings → Alerts, then make sure notifications are allowed in System Settings → Notifications → Trace.</div>
+        <div class="a">Check the toggles in Trace's Settings → Alerts, then make sure notifications are allowed in System Settings → Notifications → Trace. Each alert also has a repeat frequency — from every 15 minutes to weekly, or "Once" until the condition clears.</div>
+      </details>
+      <details>
+        <summary>What languages does Trace speak?</summary>
+        <div class="a">English, Spanish, German, French and Japanese — the app follows your macOS language setting automatically.</div>
       </details>
       <details>
         <summary>Can I hide Apple's battery icon since Trace shows battery?</summary>
@@ -589,7 +607,7 @@
   <div class="wrap">
     <div class="contact-card reveal">
       <h2>Get Trace</h2>
-      <p>Free on the Mac App Store for macOS 26 or later.<br>Questions, bug reports and feature ideas are all welcome.</p>
+      <p>Free on the Mac App Store for macOS 14 or later.<br>Questions, bug reports and feature ideas are all welcome.</p>
       <!-- Once live, swap this for the App Store badge + link -->
       <a class="btn-invert" href="mailto:pat1990r@gmail.com?subject=Trace">Email support</a>
     </div>

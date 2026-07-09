@@ -189,6 +189,27 @@
       <tr><td><code>AnnouncementURL</code></td><td>string</td><td>Optional link opened when the banner is clicked (status page, change notice…).</td></tr>
       <tr><td><code>ForceLaunchAtLogin</code></td><td>boolean</td><td>When true, Trace registers itself as a login item every time it launches. See the caveat in <a href="#app">section 6</a>.</td></tr>
     </table>
+
+    <h3 style="margin-top:26px">Alert &amp; compliance keys</h3>
+    <p>Every notification the app can send is manageable. Forcing any key locks the matching control in Settings → Alerts ("Managed by your organisation") and applies live. Frequency values, from gentle to insistent: <code>once</code> · <code>every15Minutes</code> · <code>every30Minutes</code> · <code>every45Minutes</code> · <code>hourly</code> · <code>every2Hours</code> · <code>daily</code> · <code>every3Days</code> · <code>weekly</code> — <code>once</code> notifies when a condition starts and re-arms when it clears.</p>
+    <table>
+      <tr><th>Key</th><th>Type</th><th>What it does</th></tr>
+      <tr><td><code>storageAlertEnabled</code></td><td>boolean</td><td>Disk-usage alerts on/off.</td></tr>
+      <tr><td><code>storageAlertThresholdPercent</code></td><td>integer</td><td>Notify above this usage. 50–99, default 90.</td></tr>
+      <tr><td><code>storageAlertFrequency</code></td><td>string</td><td>Repeat cadence. Default <code>daily</code>.</td></tr>
+      <tr><td><code>uptimeAlertEnabled</code></td><td>boolean</td><td>Restart reminders on/off.</td></tr>
+      <tr><td><code>uptimeAlertDays</code></td><td>integer</td><td>Remind after this many days up. 1–30, default 7.</td></tr>
+      <tr><td><code>uptimeAlertFrequency</code></td><td>string</td><td>Repeat cadence. Default <code>daily</code>.</td></tr>
+      <tr><td><code>batteryAlertEnabled</code></td><td>boolean</td><td>Low-battery alerts on/off (portables; ignored on desktops).</td></tr>
+      <tr><td><code>batteryAlertThresholdPercent</code></td><td>integer</td><td>Notify below this level while discharging. 5–50, default 15.</td></tr>
+      <tr><td><code>batteryAlertFrequency</code></td><td>string</td><td>Repeat cadence. Default <code>once</code> (re-arms when charged).</td></tr>
+      <tr><td><code>softwareUpdateAlertEnabled</code></td><td>boolean</td><td>macOS update reminders on/off (public SOFA release feed).</td></tr>
+      <tr><td><code>softwareUpdateAlertFrequency</code></td><td>string</td><td>Repeat cadence. Default <code>every3Days</code>. Set <code>hourly</code> or faster to apply real pressure.</td></tr>
+      <tr><td><code>UpdateDeadlineDays</code></td><td>integer</td><td>Patch window in days after a macOS release (e.g. <code>14</code> for Cyber&nbsp;Essentials+). Reminders escalate to <em>at least daily</em> in the final 3 days and once overdue — a faster configured cadence is kept. Notifications carry "Open Software Update" and a 24-hour snooze. <code>0</code>/unset = off.</td></tr>
+      <tr><td><code>healthAlertsEnabled</code></td><td>boolean</td><td>Sustained memory pressure (&gt;5 min), thermal throttling (&gt;2 min), battery capacity below 80%.</td></tr>
+      <tr><td><code>healthAlertFrequency</code></td><td>string</td><td>Repeat cadence. Default <code>daily</code>; battery-health notices additionally capped at one per 30 days.</td></tr>
+    </table>
+    <div class="callout">Fleet visibility: two ready-made <b>Jamf Extension Attributes</b> (downloads below) report each Mac's update pressure — "Up to date" / "Behind: 26.2 available (11 days)" — and whether Trace is running, using the same cached release data the deadline escalation runs on.</div>
   </section>
 
   <section class="doc-sec" id="tickets">
@@ -314,6 +335,18 @@ defaults read com.patrickramagge.trace OrganizationName</code></pre>
       <a class="dl" href="deployment/Trace-Jamf-Schema.json" download>
         <b>Trace-Jamf-Schema.json</b>
         <span>Jamf custom schema — admins get a form instead of raw XML.</span>
+      </a>
+      <a class="dl" href="deployment/Trace-Runbook.md" download>
+        <b>Trace-Runbook.md</b>
+        <span>Operations runbook — data storage &amp; retention, network endpoints, reset/uninstall commands, full Jamf lifecycle.</span>
+      </a>
+      <a class="dl" href="deployment/Extension%20Attributes/Trace%20Running.sh" download>
+        <b>EA: Trace Running.sh</b>
+        <span>Jamf Extension Attribute — install/run state for adoption smart groups.</span>
+      </a>
+      <a class="dl" href="deployment/Extension%20Attributes/macOS%20Update%20Pressure.sh" download>
+        <b>EA: macOS Update Pressure.sh</b>
+        <span>Jamf Extension Attribute — "Up to date" / "Behind: X available (N days)" from Trace's cached release data. Setup notes in the <a href="deployment/Extension%20Attributes/README.md">EA README</a>.</span>
       </a>
     </div>
     <p style="margin-top:18px">Questions, requests for additional managed keys, or pilot feedback: <a href="mailto:pat1990r@gmail.com?subject=Trace%20MDM">pat1990r@gmail.com</a>.</p>
