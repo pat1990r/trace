@@ -182,8 +182,8 @@
       <tr><td><code>SupportPortalLabel</code></td><td>string</td><td>Label for that link. Defaults to "Support portal" when empty.</td></tr>
       <tr><td><code>SupportEmail</code></td><td>string</td><td>Shown as a row that opens a pre-addressed email (<code>mailto:</code>).</td></tr>
       <tr><td><code>SupportPhone</code></td><td>string</td><td>Shown as a row that initiates a call (<code>tel:</code>; spaces stripped automatically).</td></tr>
-      <tr><td><code>TicketURLTemplate</code></td><td>string</td><td>"Create a ticket" link with per-device placeholders substituted at click time — see <a href="#tickets">section 4</a>.</td></tr>
-      <tr><td><code>TicketLabel</code></td><td>string</td><td>Label for the ticket button. Defaults to "Create a ticket".</td></tr>
+      <tr><td><code>TicketURLTemplate</code></td><td>string</td><td>"Log a ticket" button with per-device placeholders substituted at click time — see <a href="#tickets">section 4</a>.</td></tr>
+      <tr><td><code>TicketLabel</code></td><td>string</td><td>Label for the ticket button. Defaults to "Log a ticket".</td></tr>
       <tr><td><code>SupportLinks</code></td><td>array&nbsp;of&nbsp;dicts</td><td>Extra link rows. Each dict: <code>Label</code> (string), <code>URL</code> (string), optional <code>Symbol</code> (an <a href="https://developer.apple.com/sf-symbols/">SF&nbsp;Symbols</a> name, e.g. <code>book</code>, <code>checkmark.shield</code>; defaults to <code>link</code>).</td></tr>
       <tr><td><code>AnnouncementMessage</code></td><td>string</td><td>Banner pinned to the top of the stats panel until the user dismisses it — see <a href="#announce">section 5</a>.</td></tr>
       <tr><td><code>AnnouncementURL</code></td><td>string</td><td>Optional link opened when the banner is clicked (status page, change notice…).</td></tr>
@@ -313,7 +313,7 @@ defaults read com.patrickramagge.trace OrganizationName</code></pre>
   <section class="doc-sec" id="security">
     <h2><span class="num">10.</span>Notes for security review</h2>
     <ul>
-      <li><strong>No telemetry.</strong> Trace collects and transmits nothing. Its only network traffic is an HTTPS GET to the public macOS-release feed <code>sofafeed.macadmins.io</code> (the same source used by Nudge), at most every six hours, carrying no device-identifying data.</li>
+      <li><strong>No telemetry.</strong> Trace collects and transmits nothing. Its network traffic is two anonymous HTTPS GETs: the public macOS-release feed <code>sofafeed.macadmins.io</code> (the same source used by Nudge, at most every six hours) and — only when a user clicks "Check for Updates" — Apple's public <code>itunes.apple.com</code> lookup. Neither carries device-identifying data.</li>
       <li><strong>Sandboxed, hardened runtime, Mac App Store reviewed.</strong> No kernel extensions, no privileged helpers, no background daemons beyond the app itself.</li>
       <li><strong>Local-only device data.</strong> Serial, IP, username and the rest are read locally and leave the device only via the user's own clipboard ("Copy for ticket") or the ticket URL the user clicks — both user-initiated, both going to <em>your</em> configured endpoints.</li>
       <li><strong>Management is one-way.</strong> Trace reads managed preferences; it reports nothing back to the MDM or anywhere else.</li>
